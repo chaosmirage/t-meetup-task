@@ -1,4 +1,4 @@
 import 'source-map-support/register';
-import half from './half';
+import buildVisitStatistics from './buildVisitStatistics';
 
-export default half;
+export default buildVisitStatistics;
