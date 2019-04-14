@@ -10,7 +10,7 @@ const getSessionTime = (start, end) => {
 
   const diff = (endSessionHours + endSessionMinutes) - (startSessionHours + startSessionMinutes);
 
-  const preparedDiff = parseInt((diff) * 100, 10) / 100;
+  const preparedDiff = parseInt((diff) * 10, 10) / 10;
   return preparedDiff;
 };
 

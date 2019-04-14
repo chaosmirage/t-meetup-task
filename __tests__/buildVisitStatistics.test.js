@@ -59,7 +59,7 @@ describe('buildVisitStatistics', () => {
     const expectResult = [
       {
         id: 1,
-        time: 3.91, // (55 + 60 + 60 + 60) / 60 = 3,916666667
+        time: 3.9, // (55 + 60 + 60 + 60) / 60 = 3,916666667
         hasSuspiciousVisits: false,
       },
       {
@@ -69,7 +69,7 @@ describe('buildVisitStatistics', () => {
       },
       {
         id: 7,
-        time: 2.66, // (55 + 60 + 15 + 30) / 60 = 2,666666667
+        time: 2.6, // (55 + 60 + 15 + 30) / 60 = 2,666666667
         hasSuspiciousVisits: false,
       },
     ];
@@ -110,7 +110,7 @@ describe('buildVisitStatistics', () => {
     const expectResult = [
       {
         id: 2,
-        time: 6.08, // (305 + 60) / 60 = 6,083333333
+        time: 6, // (305 + 60) / 60 = 6,083333333
         hasSuspiciousVisits: true,
       },
     ];
