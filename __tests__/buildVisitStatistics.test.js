@@ -117,4 +117,45 @@ describe('buildVisitStatistics', () => {
 
     expect(result).toEqual(expectResult);
   });
+
+  it('Equal sessions', () => {
+    const DATA_MOCK = [
+      {
+        date: 1554202800000, // 2019-04-02T11:00:00.000Z
+        id: 7,
+        type: 'in',
+      },
+      {
+        date: 1554204600000, // 2019-04-02T11:30:00.000Z
+        id: 7,
+        type: 'out',
+      },
+      {
+        date: 1554202800000, // 2019-04-02T11:00:00.000Z
+        id: 7,
+        type: 'in',
+      },
+      {
+        date: 1554204600000, // 2019-04-02T11:30:00.000Z
+        id: 7,
+        type: 'out',
+      },
+    ];
+
+    const result = buildVisitStatistics(
+      DATA_MOCK,
+      '2019-04-02T08:00:00.000Z',
+      '2019-04-02T12:00:00.000Z',
+    );
+
+    const expectResult = [
+      {
+        id: 7,
+        time: 0.5, // (55 + 60 + 15 + 30) / 60 = 2,666666667
+        hasSuspiciousVisits: false,
+      },
+    ];
+
+    expect(result).toEqual(expectResult);
+  });
 });

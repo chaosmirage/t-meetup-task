@@ -1,5 +1,6 @@
 import sortBy from 'lodash/sortBy';
-import get from 'lodash/get';
+import groupBy from 'lodash/groupBy';
+import uniqBy from 'lodash/uniqBy';
 
 const getSessionTime = (start, end) => {
   const startSessionHours = new Date(start).getHours();
@@ -31,66 +32,62 @@ export default (data, dateStart, dateEnd) => {
   const parsedDateEnd = (new Date(dateEnd)).getTime();
 
   const sorted = sortBy(data, 'date');
+  const dataByUserId = groupBy(sorted, 'id');
 
-  const dataByUserId = sorted.reduce((acc, { id, ...rest }) => {
-    const currentUserData = get(acc, [id], []);
-
-    return { ...acc, [id]: [...currentUserData, rest] };
-  }, {});
-
-  const result = Object.keys(dataByUserId)
+  const statistics = Object.keys(dataByUserId)
     .map((userId) => {
-      const userVisitsData = dataByUserId[userId];
+      const userVisitsData = uniqBy(dataByUserId[userId], 'date');
 
-      let statistics = { time: 0, hasSuspiciousVisits: false, id: parseInt(userId, 10) };
+      let sessionStatistic = {
+        time: 0,
+        hasSuspiciousVisits: false,
+        id: parseInt(userId, 10),
+      };
       let startSessionData = null;
-      let state = 'beforeSession'; // beforeSession, inSession, afterSession
+      let state = 'beforeSession'; // beforeSession, inSession
 
       userVisitsData.forEach((userAction, id) => {
         const isLastAction = id === userVisitsData.length - 1;
         const { type, date } = userAction;
 
-        const isForbiddenTime = checkIsForbiddenTime(date);
-
-        if (isForbiddenTime) {
-          statistics.hasSuspiciousVisits = true;
-        }
-
         const isDateInPeriod = date >= parsedDateStart && date <= parsedDateEnd;
-
         if (!isDateInPeriod) {
           return;
+        }
+
+        const isForbiddenTime = checkIsForbiddenTime(date);
+        if (isForbiddenTime) {
+          sessionStatistic.hasSuspiciousVisits = true;
         }
 
         switch (state) {
           case 'beforeSession':
             if (type === 'out') {
-              statistics.hasSuspiciousVisits = true;
+              sessionStatistic.hasSuspiciousVisits = true;
             }
 
             if (type === 'in' && isLastAction) {
               const sessionTime = getSessionTime(date, parsedDateEnd);
-              const currentUserTime = statistics.time;
+              const currentUserTime = sessionStatistic.time;
               const newTime = currentUserTime + sessionTime;
 
-              statistics = { ...statistics, time: newTime };
+              sessionStatistic = { ...sessionStatistic, time: newTime };
               break;
             }
 
             if (type === 'in') {
               startSessionData = userAction;
               state = 'inSession';
-              break;
             }
 
             break;
           case 'inSession':
             if (type === 'out') {
               const sessionTime = getSessionTime(startSessionData.date, date);
-              const currentUserTime = statistics.time;
+              const currentUserTime = sessionStatistic.time;
               const newTime = currentUserTime + sessionTime;
 
-              statistics = { ...statistics, time: newTime };
+              sessionStatistic = { ...sessionStatistic, time: newTime };
 
               state = 'beforeSession';
             }
@@ -101,8 +98,8 @@ export default (data, dateStart, dateEnd) => {
         }
       });
 
-      return statistics;
+      return sessionStatistic;
     });
 
-  return result;
+  return statistics;
 };
